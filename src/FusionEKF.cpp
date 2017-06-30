@@ -90,10 +90,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       Convert radar from polar to cartesian coordinates and initialize state.
       */
         
-        if ((measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1])) != 0 && (measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1])) !=0){
-            ekf_.x_ << measurement_pack.raw_measurements_[0]* cos(measurement_pack.raw_measurements_[1]),
-            measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1]), 0, 0;
-        }
+        // convert from polar to Cartesian
+        float rho = measurement_pack.raw_measurements_[0];
+        float phi = measurement_pack.raw_measurements_[1];
+        float rho_dot = measurement_pack.raw_measurements_[2];
+        float px = rho * cos(phi);
+        float py = rho * sin(phi);
+        
+        if (px != 0 && py !=0)      //avooid Jaboian
+            ekf_.x_ << rho * cos(phi), rho * sin(phi), 0, 0;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
